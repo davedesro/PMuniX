@@ -20,12 +20,12 @@
 # Example
 #   http://webservices.nextbus.com/service/publicXMLFeed?command=commandName&a=sf-muni&additionParams...
 #
-# Commands
-# 1) "routeList"
-# 2) "routeConfig"
-# 3) "predictions"
+# Commands [http://www.sfmta.com/cms/asite/nextmunidata.htm]
+# 1) "routeList" --> basic route names list
+# 2) "routeConfig" --> given route name, return all associated stops w/ IDs and geo location
+# 3) "predictions" --> given stop #, determine in/outbound buses
 # 4) "predictionsForMultiStops"
-# 5) "vehicleLocations"
+# 5) "vehicleLocations"  --> return geo coordinates of buses, per <route> and <time> (only changes returned)
 # 
 # Command Examples
 # 1) Get all routes
@@ -39,6 +39,8 @@
 import xml.etree.ElementTree as xmlparser
 import urllib2
 import time
+import re
+from xml.dom.minidom import parseString
 
 # Constants
 
@@ -46,7 +48,7 @@ import time
 def sendRequest(url):
     result = None
     try:
-    	result = urllib2.urlopen(url).read()
+        result = urllib2.urlopen(url).read()
     except urllib2.HTTPError, e:
     	print "HTTP error: %d" % e.code
     except urllib2.URLError, e:
@@ -56,13 +58,13 @@ def sendRequest(url):
     
 def connectionToMuniTest():
     test_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=routeList&a=sf-muni"
-    result = sendRequest(test_url)
-    xml_root_element = xmlparser.fromstring(result)
-    children = xml_root_element.getchildren()
-
-    for node in children:
-        print node.attrib
-        
+    url = 'http://webservices.nextbus.com/service/publicXMLFeed?command=predictionsForMultiStops&a=sf-muni&stops=N|null|6997&stops=N|null|3909'
+    
+    result = sendRequest(url)
+    printXML(result)
+    
+    return(0)
+       
 def simpleRouteQueryTest():
     base_url = "http://webservices.nextbus.com/service/publicXMLFeed"
     get_routes_url = base_url + "?command=routeList&a=sf-muni"
@@ -71,8 +73,46 @@ def simpleRouteQueryTest():
     routes_result = sendRequest(get_routes_url)
     time.sleep(1)
 
-# Tests        
-connectionToMuniTest()
-time.sleep(1)
-simpleRouteQueryTest()
 
+def printXML(xmlString):
+    xml = parseString(xmlString)
+    formattedResult = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
+    print formattedResult
+    
+    return(0)
+    
+    # Original
+    xml_root_element = xmlparser.fromstring(xmlString)
+    children = xml_root_element.getchildren()
+    for node in children:
+        node.attrib
+    
+
+# Using static query, populate DB with stop data
+def populateDB():
+    print "placeholder"
+
+
+# Using (static) DB and passed geo location, find closet stop
+def closestStop():
+    print "placeholder"
+
+
+# Using (dynamic) query and passed geo location, find closet bus
+def closestBus():
+    print "placeholder"
+
+
+    
+def main():
+    # Tests        
+    connectionToMuniTest()
+    #time.sleep(1)
+    #simpleRouteQueryTest()
+    print "DONE main\n"
+	
+	
+if __name__ == "__main__":
+    main()
+
+	
