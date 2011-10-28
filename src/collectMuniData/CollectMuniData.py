@@ -48,7 +48,7 @@ from xml.dom.minidom import parseString
 def sendRequest(url):
     result = None
     try:
-        result = urllib2.urlopen(url).read()
+    	result = urllib2.urlopen(url).read()
     except urllib2.HTTPError, e:
     	print "HTTP error: %d" % e.code
     except urllib2.URLError, e:
@@ -74,10 +74,10 @@ def simpleRouteQueryTest():
     time.sleep(1)
 
 
-def printXML(xmlString):
-    xml = parseString(xmlString)
-    formattedResult = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
-    print formattedResult
+def printXML(xml_string):
+    xml = parseString(xml_string)
+    formatted_result = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
+    print formatted_result
     
     return(0)
     
@@ -88,19 +88,32 @@ def printXML(xmlString):
         node.attrib
     
 
-# Using static query, populate DB with stop data
+# Using static query, populate DB with stop data. See 1.5MB publicXMLFeed_allstops.xml. 
+# Full stop query http://webservices.nextbus.com/service/publicXMLFeed?command=routeConfig&a=sf-muni
 def populateDB():
-    print "placeholder"
+    # Django: 
+    # table 1 [stops] - stop_tag, stop_name_full, lat, long, stop_id, routes 
+    # table 2 [current buses] - vehicle_id, route_tag, lat, long, sec_last_update
+    pass
 
+    
+# Given stop_tag, return object with query info from DB
+def stopQuery():
+    pass
 
-# Using (static) DB and passed geo location, find closet stop
+# Given stop_tag, return next buses (each route being serviced)
+def stopNextBuses():
+    # use predictions command
+    pass
+    
+# Given geo location, return object with closest stop_tag and distance per coord
 def closestStop():
-    print "placeholder"
-
-
-# Using (dynamic) query and passed geo location, find closet bus
+    pass
+    
+# Given geo location, return closest buses
 def closestBus():
-    print "placeholder"
+    # May want to periodically populate DB with all bus location info, then directly query DB for faster results
+    pass
 
 
     
