@@ -41,6 +41,8 @@ import urllib2
 import time
 import re
 from xml.dom.minidom import parseString
+from muniroutes.polls import Stops
+from muniroutes.polls import BusLoc
 
 # Constants
 
@@ -86,17 +88,62 @@ def printXML(xml_string):
     children = xml_root_element.getchildren()
     for node in children:
         node.attrib
-    
 
-# Using static query, populate DB with stop data. See 1.5MB publicXMLFeed_allstops.xml. 
-# Full stop query http://webservices.nextbus.com/service/publicXMLFeed?command=routeConfig&a=sf-muni
-def populateDB():
-    # Django: 
-    # table 1 [stops] - stop_tag, stop_name_full, lat, long, stop_id, routes 
-    # table 2 [current buses] - vehicle_id, route_tag, lat, long, sec_last_update
-    pass
+# Return query data - whether from file or web
+# FIX: http return requests do not work
+def getQuery(name, type):
+    if (name == 'bus_loc'):
+        if (type == 'file'):
+            return('bus_loc-publicXMLFeed.xml')
+        elif (type == 'http'):
+            result = sendRequest('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&t=0')
+            return(result)
+    elif (name == 'stops'):
+        if (type == 'file'):
+            return('all_stop-publicXMLFeed.xml')
+        elif(type == 'http'):
+            result = sendRequest('http://webservices.nextbus.com/service/publicXMLFeed?command=routeConfig&a=sf-muni')
+            return(results)
 
-    
+
+# Create local DB selected  
+def populateDB(type='none'):
+    if (type == 'bus_loc'):
+        source = getQuery('bus_loc','file')
+        tree = xmlparser.parse(source)
+
+        # For testing, clear out all old data prior to writing
+        BusLoc.objects.all().delete()
+        
+        for parent in tree.iter('body'):
+            for child in parent:
+                if (child.tag == 'vehicle'):
+                    print "DEBUG: [%s] [%s] [%s] [%s] [%s] [%s] [%s]\n"%(child.get('id'), child.get('routeTag'), child.get('dirTag'), child.get('lat'), child.get('lon'), child.get('secsSinceReport'), child.get('predictable') )            
+                    curr_bus_loc = BusLoc(vehId=child.get('id'),routeTag=child.get('routeTag'),dirTag=child.get('dirTag'),lat=child.get('lat'),lon=child.get('lon'),secsSinceReport=child.get('secsSinceReport'),predictable=child.get('predictable'))
+                    curr_bus_loc.save()
+        return()
+        
+    elif (type == 'stops'):
+        source = getQuery('stops','file')
+        tree = xmlparser.parse(source)
+
+        # For testing, clear out all old data prior to writing
+        Stops.objects.all().delete()
+        
+        for parent in tree.iter('route'):
+            print "DEBUG: %s %s\n"%(parent.tag, parent.get('tag'))
+            for child in parent:
+                if (child.tag == 'stop'):
+                    print "DEBUG: [%s][%s] - [%s] [%s] [%s] [%s] [%s] [%s]\n"%(parent.tag,child.tag, child.get('tag'), child.get('title'), child.get('lat'), child.get('lon'), child.get('stopId'), parent.get('tag') )            
+                    curr_stop = Stops(tag=child.get('tag'),title=child.get('title'),lat=child.get('lat'),lon=child.get('lon'),stopId=child.get('stopId'),route=parent.get('tag'))
+                    curr_stop.save()
+        return()
+        
+    else:
+        print "Invalid type [%s]"%(type)
+        return(1)    
+
+
 # Given stop_tag, return object with query info from DB
 def stopQuery():
     pass
