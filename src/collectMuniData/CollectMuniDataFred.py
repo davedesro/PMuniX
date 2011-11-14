@@ -47,7 +47,7 @@ from xml.dom.minidom import parseString
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
 
 # Functions
-def sendRequest(url):
+def send_request(url):
     result = None
     try:
     	result = urllib2.urlopen(url).read()
@@ -58,20 +58,20 @@ def sendRequest(url):
     	
     return result
     
-def printXml(xml_string):
+def print_xml(xml_string):
     xml = parseString(xml_string)
     formatted_result = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
     print formatted_result
     
-def connectToMuniTest():
+def connect_to_muni_test():
     print "Test to see if the Muni data is up."
     test_url = SF_MUNI_URL + 'routeList&a=sf-muni'
     
     print "Test url: " + test_url
-    result = sendRequest(test_url)
+    result = send_request(test_url)
     
     print "The result in xml form:"
-    printXml(result)
+    print_xml(result)
     
     print "The result from the xml library:"
     tree = xmlparser.fromstring(result)
@@ -79,13 +79,13 @@ def connectToMuniTest():
     for node in children:
         print node.tag, node.attrib
        
-def simpleRouteQueryTest():
+def simple_route_query_test():
     print "Test to get specific information about a route."
     routes_url = SF_MUNI_URL + 'routeList&a=sf-muni'
     route_detail_url = SF_MUNI_URL + 'routeConfig&a=sf-muni&r='
     
     print "Routes url: " + routes_url
-    routes_result = sendRequest(routes_url)
+    routes_result = send_request(routes_url)
     root = xmlparser.fromstring(routes_result)
     routes = list(root)
     first_route = routes[0]
@@ -93,10 +93,10 @@ def simpleRouteQueryTest():
     time.sleep(1)
     
     print "Route detail url: " + route_detail_url
-    route_detail_result = sendRequest(route_detail_url)
+    route_detail_result = send_request(route_detail_url)
     
     print "The result in xml form:"
-    printXml(route_detail_result)
+    print_xml(route_detail_result)
     
     print "The result from the xml library:"
     root = xmlparser.fromstring(route_detail_result)
@@ -119,39 +119,12 @@ def simpleRouteQueryTest():
         points = path.findall("point")
         for point in points:
             print "  ", "  ", point.tag, point.attrib
-    
-        
-# Using static query, populate DB with stop data. See 1.5MB publicXMLFeed_allstops.xml. 
-# Full stop query http://webservices.nextbus.com/service/publicXMLFeed?command=routeConfig&a=sf-muni
-def populateDB():
-    # Django: 
-    # table 1 [stops] - stop_tag, stop_name_full, lat, long, stop_id, routes 
-    # table 2 [current buses] - vehicle_id, route_tag, lat, long, sec_last_update
-    pass
-   
-# Given stop_tag, return object with query info from DB
-def stopQuery():
-    pass
-
-# Given stop_tag, return next buses (each route being serviced)
-def stopNextBuses():
-    # use predictions command
-    pass
-    
-# Given geo location, return object with closest stop_tag and distance per coord
-def closestStop():
-    pass
-    
-# Given geo location, return closest buses
-def closestBus():
-    # May want to periodically populate DB with all bus location info, then directly query DB for faster results
-    pass
-	
+    	
 if __name__ == "__main__":
     # Tests        
-    connectToMuniTest()
+    connect_to_muni_test()
     time.sleep(1)
     print ''
-    simpleRouteQueryTest()
+    simple_route_query_test()
 
 	
