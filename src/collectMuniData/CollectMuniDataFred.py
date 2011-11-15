@@ -86,7 +86,7 @@ class StopParser(Parser):
         pass
     
     @staticmethod    
-    def get_stop_from_dict(values):
+    def get_data_from_dict(values):
         stop = Stop()
         stop.id = int( values.get(StopParser.ID_LABEL) )
         stop.name = values.get(Parser.TITLE_LABEL)
@@ -132,9 +132,38 @@ class RouteParser(Parser):
         
     def __str__(self):
         pass
+        
+    @staticmethod
+    def parse_route_from_xml(xml):
+        root_xml = xmlparser.fromstring(xml)
+        route_xml = list(root_xml)
+        route = RouteParser.get_data_from_dict(route_xml[0].attrib)
+        print str(route)
+
+        # TODO -> follow a similar pattern below and find out why I have to make a list to get route_xml
+        stops = root_xml.findall("route/stop")
+        for stop in stops:
+            pass
+            #print "  ", stop.tag, stop.attrib
+
+        directions = root_xml.findall("route/direction")
+        for direction in directions:
+            #print "  ", direction.tag, direction.attrib
+            stops = direction.findall("stop")
+            for stop in stops:
+                pass
+                #print "  ", "  ", stop.tag, stop.attrib
+
+        paths = root_xml.findall("route/path")
+        for path in paths:
+            #print "  ", path.tag, path.attrib
+            points = path.findall("point")
+            for point in points:
+                pass
+                #print "  ", "  ", point.tag, point.attrib
     
     @staticmethod    
-    def get_route_from_dict(values):
+    def get_data_from_dict(values):
         route = Route()
         route.name = values.get(Parser.TITLE_LABEL)
         route.tag = values.get(Parser.TAG_LABEL)
@@ -169,8 +198,9 @@ class Stop(object):
 class Direction(object):
     
     DirectionType = enum(INBOUND=1, OUTBOUND=2)
+    # Is there a way to do this in constructor: dir_type=class.DirectionType.INBOUND
     
-    def __init__(self, dir_type=class.DirectionType.INBOUND, name="Generic Direction", tag=-1):
+    def __init__(self, dir_type=1, name="Generic Direction", tag=-1):
         self.type = dir_type
         self.name = name
         self.tag = tag
@@ -239,47 +269,21 @@ def simple_route_query_test():
     routes_result = send_request(routes_url)
     root = xmlparser.fromstring(routes_result)
     routes = list(root)
-    first_route = routes[0]
-    route_detail_url = route_detail_url + first_route.attrib['tag']
-    time.sleep(1)
     
-    print "Route detail url: " + route_detail_url
-    route_detail_result = send_request(route_detail_url)
+    # DO THIS FOR TESTING
+    for route in routes[:1]:
+        route_url = route_detail_url + route.attrib['tag']
     
-    print "The result in xml form:"
-    print_xml(route_detail_result)
-    
-    print "The result from the xml library:"
-    root = xmlparser.fromstring(route_detail_result)
-    route = list(root)
-    print route[0].tag, route[0].attrib
-    
-    stops = root.findall("route/stop")
-    for stop in stops:
-        pass
-        #print "  ", stop.tag, stop.attrib
-        
-    directions = root.findall("route/direction")
-    for direction in directions:
-        #print "  ", direction.tag, direction.attrib
-        stops = direction.findall("stop")
-        for stop in stops:
-            pass
-            #print "  ", "  ", stop.tag, stop.attrib
-        
-    paths = root.findall("route/path")
-    for path in paths:
-        print "  ", path.tag, path.attrib
-        points = path.findall("point")
-        for point in points:
-            pass
-            #print "  ", "  ", point.tag, point.attrib
+        print "Route detail url: " + route_url
+        route_detail_result = send_request(route_url)
+        time.sleep(1)
+        route = RouteParser.parse_route_from_xml(route_detail_result)
     	
 if __name__ == "__main__":
     # Tests        
-    connect_to_muni_test()
-    time.sleep(1)
-    print ''
+    #connect_to_muni_test()
+    #time.sleep(1)
+    #print ''
     simple_route_query_test()
 
 	
