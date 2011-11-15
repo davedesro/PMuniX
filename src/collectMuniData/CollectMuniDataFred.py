@@ -46,6 +46,152 @@ from xml.dom.minidom import parseString
 # Constants
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
 
+# Helper functions
+def enum(**enums):
+    return type('Enum', (), enums)
+    
+    # Example
+    #Numbers = enum(ONE=1, TWO=2, THREE='three')
+    #Numbers.ONE
+    #1
+    #Numbers.TWO
+    #2
+
+# Models   
+class Parser(object):
+    
+    TITLE_LABEL = "title"
+    TAG_LABEL = "tag"
+    
+    def __init__(self):
+        pass
+    
+    def __str__(self):
+        pass
+        
+    def get_data_from_dict(values):
+        pass
+            
+class StopParser(Parser):
+    
+    ID_LABEL = "stopId"
+    LATITUDE_LABEL = "lat"
+    LONGITUDE_LABEL = "lon"
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    def get_stop_from_dict(values):
+        stop = Stop()
+        stop.id = int( values.get(StopParser.ID_LABEL) )
+        stop.name = values.get(Parser.TITLE_LABEL)
+        stop.tag = values.get(Parser.TAG_LABEL)
+        latitude = float( values.get(StopParser.LATITUDE_LABEL) )
+        longitude = float( values.get(StopParser.LONGITUDE_LABEL) )
+        location = Location(latitude, longitude)
+        
+        return stop
+       
+class DirectionParser(Parser):
+    
+    NAME_LABEL = "name"
+    NAMES ['Inbound', 'Outbound'] 
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    def get_data_from_dict(values):
+        direction = Direction()
+        if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
+            direction.type = Direction.INBOUND
+        else:
+            direction.type = Direction.OUTBOUND
+        direction.name = values.get(Parser.TITLE_LABEL)
+        direction.tag = values.get(Parser.TAG_LABEL)    
+        
+        return direction
+             
+class RouteParser(Parser):
+    
+    LATITUDE_MIN_LABEL = 'latMin'
+    LATITUDE_MAX_LABEL = 'latMax'
+    LONGITUDE_MIN_LABEL = 'lonMin'
+    LONGITUDE_MAX_LABEL = 'lonMax'
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    def get_route_from_dict(values):
+        route = Route()
+        route.name = values.get(Parser.TITLE_LABEL)
+        route.tag = values.get(Parser.TAG_LABEL)
+        latitude_min = float( values.get(RouteParser.LATITUDE_MIN_LABEL) )
+        latitude_max = float( values.get(RouteParser.LATITUDE_MAX_LABEL) )
+        longitude_min = float( values.get(RouteParser.LONGITUDE_MIN_LABEL) )
+        longtitude_max = float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
+        route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
+        
+        return route
+        
+class Location(object):
+
+    def __init__(self, latitude=0.0, longitude=0.0):
+        self.latitude = latitude
+        self.longitude = longitude
+
+    def __str__(self):
+        return '(' + str(self.latitude) + ', ' + str(self.longitude) + ')'
+ 
+class Stop(object):
+    
+    def __init__(self, stop_id=-1, name="Generic Stop", tag=-1, location=Location()):
+        self.id = stop_id
+        self.name = name
+        self.tag = tag
+        self.location = location
+        
+    def __str__(self):
+        return self.name + '(' + str(self.id) + ') Location: ' + str(self.location)
+        
+class Direction(object):
+    
+    DirectionType = enum(INBOUND=1, OUTBOUND=2)
+    
+    def __init__(self, dir_type=Direction.DirectionType.INBOUND, name="Generic Direction", tag=-1):
+        self.type = dir_type
+        self.name = name
+        self.tag = tag
+        
+    def __str__(self):
+        dir_type = 'Outbound'
+        if self.type = Direction.DirectionType.INBOUND:
+            dir_type = 'Inbound'
+        return self.name + '(' + dir_type + ')' 
+        
+class Route(object):
+
+    def __init__(self):
+        self.name = ''
+        self.tag = -1
+        self.stops = []
+        self.directions = []
+        self.bounding_box = []
+        
+    def __str__(self):
+        return self.name
+        
+    def find_stop(tag):
+        pass
+
 # Functions
 def send_request(url):
     result = None
