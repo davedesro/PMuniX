@@ -68,7 +68,8 @@ class Parser(object):
     
     def __str__(self):
         pass
-        
+     
+    @staticmethod   
     def get_data_from_dict(values):
         pass
             
@@ -83,7 +84,8 @@ class StopParser(Parser):
         
     def __str__(self):
         pass
-        
+    
+    @staticmethod    
     def get_stop_from_dict(values):
         stop = Stop()
         stop.id = int( values.get(StopParser.ID_LABEL) )
@@ -98,14 +100,15 @@ class StopParser(Parser):
 class DirectionParser(Parser):
     
     NAME_LABEL = "name"
-    NAMES ['Inbound', 'Outbound'] 
+    NAMES = ['Inbound', 'Outbound'] 
     
     def __init__(self):
         pass
         
     def __str__(self):
         pass
-        
+    
+    @staticmethod    
     def get_data_from_dict(values):
         direction = Direction()
         if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
@@ -129,7 +132,8 @@ class RouteParser(Parser):
         
     def __str__(self):
         pass
-        
+    
+    @staticmethod    
     def get_route_from_dict(values):
         route = Route()
         route.name = values.get(Parser.TITLE_LABEL)
@@ -166,14 +170,15 @@ class Direction(object):
     
     DirectionType = enum(INBOUND=1, OUTBOUND=2)
     
-    def __init__(self, dir_type=Direction.DirectionType.INBOUND, name="Generic Direction", tag=-1):
+    def __init__(self, dir_type=class.DirectionType.INBOUND, name="Generic Direction", tag=-1):
         self.type = dir_type
         self.name = name
         self.tag = tag
+        self.stops = []
         
     def __str__(self):
         dir_type = 'Outbound'
-        if self.type = Direction.DirectionType.INBOUND:
+        if self.type == Direction.DirectionType.INBOUND:
             dir_type = 'Inbound'
         return self.name + '(' + dir_type + ')' 
         
@@ -190,7 +195,7 @@ class Route(object):
         return self.name
         
     def find_stop(tag):
-        pass
+        return filter(lambda x: x.tag == tag, self.stops)[0]
 
 # Functions
 def send_request(url):
@@ -248,23 +253,27 @@ def simple_route_query_test():
     root = xmlparser.fromstring(route_detail_result)
     route = list(root)
     print route[0].tag, route[0].attrib
+    
     stops = root.findall("route/stop")
     for stop in stops:
-        print "  ", stop.tag, stop.attrib
+        pass
+        #print "  ", stop.tag, stop.attrib
         
     directions = root.findall("route/direction")
     for direction in directions:
-        print "  ", direction.tag, direction.attrib
+        #print "  ", direction.tag, direction.attrib
         stops = direction.findall("stop")
         for stop in stops:
-            print "  ", "  ", stop.tag, stop.attrib
+            pass
+            #print "  ", "  ", stop.tag, stop.attrib
         
     paths = root.findall("route/path")
     for path in paths:
         print "  ", path.tag, path.attrib
         points = path.findall("point")
         for point in points:
-            print "  ", "  ", point.tag, point.attrib
+            pass
+            #print "  ", "  ", point.tag, point.attrib
     	
 if __name__ == "__main__":
     # Tests        
