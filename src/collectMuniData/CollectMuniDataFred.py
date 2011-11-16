@@ -50,12 +50,10 @@ SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
 def enum(**enums):
     return type('Enum', (), enums)
     
-    # Example
-    #Numbers = enum(ONE=1, TWO=2, THREE='three')
-    #Numbers.ONE
-    #1
-    #Numbers.TWO
-    #2
+def print_xml(xml_string):
+    xml = parseString(xml_string)
+    formatted_result = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
+    print formatted_result
 
 # Models   
 class Parser(object):
@@ -72,6 +70,14 @@ class Parser(object):
     @staticmethod   
     def get_data_from_dict(values):
         pass
+        
+    @staticmethod
+    def get_title(values):
+        return values.get(Parser.TITLE_LABEL)
+        
+    @staticmethod
+    def get_tag(values):
+        return values.get(Parser.TAG_LABEL)
             
 class StopParser(Parser):
     
@@ -88,15 +94,28 @@ class StopParser(Parser):
     @staticmethod    
     def get_data_from_dict(values):
         stop = Stop()
-        stop.id = int( values.get(StopParser.ID_LABEL) )
-        stop.name = values.get(Parser.TITLE_LABEL)
-        stop.tag = values.get(Parser.TAG_LABEL)
-        latitude = float( values.get(StopParser.LATITUDE_LABEL) )
-        longitude = float( values.get(StopParser.LONGITUDE_LABEL) )
+        stop.id = StopParser.get_id(values)
+        stop.name = StopParser.get_name(values)
+        stop.tag = StopParser.get_tag(values)
+        latitude = StopParser.get_latitude(values)
+        longitude = StopParser.get_longitude(values)
         location = Location(latitude, longitude)
+        stop.location = location
         
         return stop
-       
+
+    @staticmethod
+    def get_id(values):
+        return int( values.get(StopParser.ID_LABEL) )
+        
+    @staticmethod
+    def get_latitude(values):
+        return float( values.get(StopParser.LATITUDE_LABEL) )
+        
+    @staticmethod
+    def get_longitude(values):
+        return float( values.get(StopParser.LONGITUDE_LABEL) )
+               
 class DirectionParser(Parser):
     
     NAME_LABEL = "name"
@@ -112,9 +131,9 @@ class DirectionParser(Parser):
     def get_data_from_dict(values):
         direction = Direction()
         if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
-            direction.type = Direction.INBOUND
+            direction.type = Direction.DirectionType.INBOUND
         else:
-            direction.type = Direction.OUTBOUND
+            direction.type = Direction.DirectionType.OUTBOUND
         direction.name = values.get(Parser.TITLE_LABEL)
         direction.tag = values.get(Parser.TAG_LABEL)    
         
@@ -135,24 +154,26 @@ class RouteParser(Parser):
         
     @staticmethod
     def parse_route_from_xml(xml):
+        print_xml(xml)
         root_xml = xmlparser.fromstring(xml)
         route_xml = list(root_xml)
         route = RouteParser.get_data_from_dict(route_xml[0].attrib)
         print str(route)
 
         # TODO -> follow a similar pattern below and find out why I have to make a list to get route_xml
-        stops = root_xml.findall("route/stop")
-        for stop in stops:
-            pass
-            #print "  ", stop.tag, stop.attrib
+        stops_xml = root_xml.findall("route/stop")
+        for stop_xml in stops_xml:
+            stop = StopParser.get_data_from_dict(stop_xml.attrib)
+            #print str(stop)
 
-        directions = root_xml.findall("route/direction")
-        for direction in directions:
-            #print "  ", direction.tag, direction.attrib
-            stops = direction.findall("stop")
-            for stop in stops:
-                pass
-                #print "  ", "  ", stop.tag, stop.attrib
+        directions_xml = root_xml.findall("route/direction")
+        for direction_xml in directions_xml:
+            direction = DirectionParser.get_data_from_dict(direction_xml.attrib)
+            #print str(direction)
+            stops_xml = direction_xml.findall("stop")
+            for stop_xml in stops_xml:
+                tag = Parser.get_tag(stop_xml.attrib)
+                print tag
 
         paths = root_xml.findall("route/path")
         for path in paths:
@@ -238,12 +259,7 @@ def send_request(url):
     	print "Network error: %s" % e.reason.args[1]
     	
     return result
-    
-def print_xml(xml_string):
-    xml = parseString(xml_string)
-    formatted_result = re.sub('[\t]\n{0,2}',' ',str(xml.toprettyxml()))
-    print formatted_result
-    
+        
 def connect_to_muni_test():
     print "Test to see if the Muni data is up."
     test_url = SF_MUNI_URL + 'routeList&a=sf-muni'
