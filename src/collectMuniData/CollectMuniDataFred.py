@@ -58,9 +58,6 @@ def print_xml(xml_string):
 # Models   
 class Parser(object):
     
-    TITLE_LABEL = "title"
-    TAG_LABEL = "tag"
-    
     def __init__(self):
         pass
     
@@ -71,15 +68,30 @@ class Parser(object):
     def get_data_from_dict(values):
         pass
         
+class TagParser(Parser):
+
+    TITLE_LABEL = "title"
+    TAG_LABEL = "tag"
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        pass
+
+    @staticmethod   
+    def get_data_from_dict(values):
+        pass
+
     @staticmethod
     def get_title(values):
         return values.get(Parser.TITLE_LABEL)
-        
+
     @staticmethod
     def get_tag(values):
         return values.get(Parser.TAG_LABEL)
             
-class StopParser(Parser):
+class StopParser(TagParser):
     
     ID_LABEL = "stopId"
     LATITUDE_LABEL = "lat"
@@ -95,7 +107,7 @@ class StopParser(Parser):
     def get_data_from_dict(values):
         stop = Stop()
         stop.id = StopParser.get_id(values)
-        stop.name = StopParser.get_name(values)
+        stop.name = StopParser.get_title(values)
         stop.tag = StopParser.get_tag(values)
         latitude = StopParser.get_latitude(values)
         longitude = StopParser.get_longitude(values)
@@ -116,7 +128,21 @@ class StopParser(Parser):
     def get_longitude(values):
         return float( values.get(StopParser.LONGITUDE_LABEL) )
                
-class DirectionParser(Parser):
+class PointParser(Parser):
+    
+    def __init__(self):
+        pass
+    def __init__(self):
+        pass
+        
+    @staticmethod    
+    def get_data_from_dict(values):
+        location = Location()
+        # TODO 
+        
+        return location
+                
+class DirectionParser(TagParser):
     
     NAME_LABEL = "name"
     NAMES = ['Inbound', 'Outbound'] 
@@ -130,16 +156,20 @@ class DirectionParser(Parser):
     @staticmethod    
     def get_data_from_dict(values):
         direction = Direction()
-        if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
-            direction.type = Direction.DirectionType.INBOUND
-        else:
-            direction.type = Direction.DirectionType.OUTBOUND
-        direction.name = values.get(Parser.TITLE_LABEL)
-        direction.tag = values.get(Parser.TAG_LABEL)    
+        direction.type = DirectionParser.get_type(values)
+        direction.name = DirectionParser.get_title(values)
+        direction.tag = DirectionParser.get_tag(values)
         
         return direction
-             
-class RouteParser(Parser):
+
+    @staticmethod
+    def get_type(values):
+        if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
+            return Direction.DirectionType.INBOUND
+        else:
+            return Direction.DirectionType.OUTBOUND
+         
+class RouteParser(TagParser):
     
     LATITUDE_MIN_LABEL = 'latMin'
     LATITUDE_MAX_LABEL = 'latMax'
@@ -172,8 +202,8 @@ class RouteParser(Parser):
             #print str(direction)
             stops_xml = direction_xml.findall("stop")
             for stop_xml in stops_xml:
-                tag = Parser.get_tag(stop_xml.attrib)
-                print tag
+                tag = TagParser.get_tag(stop_xml.attrib)
+                #print tag
 
         paths = root_xml.findall("route/path")
         for path in paths:
@@ -182,19 +212,35 @@ class RouteParser(Parser):
             for point in points:
                 pass
                 #print "  ", "  ", point.tag, point.attrib
-    
+              
     @staticmethod    
     def get_data_from_dict(values):
         route = Route()
-        route.name = values.get(Parser.TITLE_LABEL)
-        route.tag = values.get(Parser.TAG_LABEL)
-        latitude_min = float( values.get(RouteParser.LATITUDE_MIN_LABEL) )
-        latitude_max = float( values.get(RouteParser.LATITUDE_MAX_LABEL) )
-        longitude_min = float( values.get(RouteParser.LONGITUDE_MIN_LABEL) )
-        longtitude_max = float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
+        route.name = RouteParser.get_title(values)
+        route.tag = RouteParser.get_tag(values)
+        latitude_min = RouteParser.get_latitude_min(values)
+        latitude_max = RouteParser.get_latitude_max(values)
+        longitude_min = RouteParser.get_longitude_min(values)
+        longtitude_max = RouteParser.get_longitude_max(values)
         route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
         
         return route
+        
+    @staticmethod
+    def get_latitude_min(values):
+        return float( values.get(RouteParser.LATITUDE_MIN_LABEL) )
+
+    @staticmethod
+    def get_latitude_max(values):
+        return float( values.get(RouteParser.LATITUDE_MAX_LABEL) )
+
+    @staticmethod
+    def get_longitude_min(values):
+        return float( values.get(RouteParser.LONGITUDE_MIN_LABEL) )
+
+    @staticmethod
+    def get_longitude_max(values):
+        return float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
         
 class Location(object):
 
@@ -233,6 +279,14 @@ class Direction(object):
             dir_type = 'Inbound'
         return self.name + '(' + dir_type + ')' 
         
+class Path(object):
+    
+    def __init__(self):
+        self.locations = []
+        
+    def __str__(self):
+        return "Number of locations: " + str(len(self.locations))
+        
 class Route(object):
 
     def __init__(self):
@@ -241,6 +295,7 @@ class Route(object):
         self.stops = []
         self.directions = []
         self.bounding_box = []
+        self.paths = []
         
     def __str__(self):
         return self.name
