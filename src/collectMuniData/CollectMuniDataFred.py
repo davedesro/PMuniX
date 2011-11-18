@@ -58,6 +58,21 @@ def print_xml(xml_string):
 # Models   
 class Parser(object):
     
+    TITLE_LABEL = "title"
+    TAG_LABEL = "tag"
+    STOP_ID_LABEL = "stopId"
+    LATITUDE_LABEL = "lat"
+    LONGITUDE_LABEL = "lon"
+    NAME_LABEL = "name"
+    LATITUDE_MIN_LABEL = 'latMin'
+    LATITUDE_MAX_LABEL = 'latMax'
+    LONGITUDE_MIN_LABEL = 'lonMin'
+    LONGITUDE_MAX_LABEL = 'lonMax'
+    
+    NAMES = ['Inbound', 'Outbound']
+    
+    DirectionType = enum(INBOUND=1, OUTBOUND=2)
+    
     def __init__(self):
         pass
     
@@ -68,21 +83,6 @@ class Parser(object):
     def get_data_from_dict(values):
         pass
         
-class TagParser(Parser):
-
-    TITLE_LABEL = "title"
-    TAG_LABEL = "tag"
-
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        pass
-
-    @staticmethod   
-    def get_data_from_dict(values):
-        pass
-
     @staticmethod
     def get_title(values):
         return values.get(Parser.TITLE_LABEL)
@@ -90,142 +90,26 @@ class TagParser(Parser):
     @staticmethod
     def get_tag(values):
         return values.get(Parser.TAG_LABEL)
-            
-class StopParser(TagParser):
-    
-    ID_LABEL = "stopId"
-    LATITUDE_LABEL = "lat"
-    LONGITUDE_LABEL = "lon"
-    
-    def __init__(self):
-        pass
         
-    def __str__(self):
-        pass
-    
-    @staticmethod    
-    def get_data_from_dict(values):
-        stop = Stop()
-        stop.id = StopParser.get_id(values)
-        stop.name = StopParser.get_title(values)
-        stop.tag = StopParser.get_tag(values)
-        latitude = StopParser.get_latitude(values)
-        longitude = StopParser.get_longitude(values)
-        location = Location(latitude, longitude)
-        stop.location = location
-        
-        return stop
-
     @staticmethod
-    def get_id(values):
-        return int( values.get(StopParser.ID_LABEL) )
-        
+    def get_stop_id(values):
+        return int( values.get(Parser.STOP_ID_LABEL) )
+
     @staticmethod
     def get_latitude(values):
-        return float( values.get(StopParser.LATITUDE_LABEL) )
-        
+        return float( values.get(Parser.LATITUDE_LABEL) )
+
     @staticmethod
     def get_longitude(values):
-        return float( values.get(StopParser.LONGITUDE_LABEL) )
-               
-class PointParser(Parser):
-    
-    def __init__(self):
-        pass
-    def __init__(self):
-        pass
+        return float( values.get(Parser.LONGITUDE_LABEL) )
         
-    @staticmethod    
-    def get_data_from_dict(values):
-        location = Location()
-        # TODO 
-        
-        return location
-                
-class DirectionParser(TagParser):
-    
-    NAME_LABEL = "name"
-    NAMES = ['Inbound', 'Outbound'] 
-    
-    def __init__(self):
-        pass
-        
-    def __str__(self):
-        pass
-    
-    @staticmethod    
-    def get_data_from_dict(values):
-        direction = Direction()
-        direction.type = DirectionParser.get_type(values)
-        direction.name = DirectionParser.get_title(values)
-        direction.tag = DirectionParser.get_tag(values)
-        
-        return direction
-
     @staticmethod
-    def get_type(values):
-        if values.get(DirectionParser.NAME_LABEL) == DirectionParser.NAMES[0]:
-            return Direction.DirectionType.INBOUND
+    def get_direction_type(values):
+        if values.get(Parser.NAME_LABEL) == Parser.NAMES[0]:
+            return Parser.DirectionType.INBOUND
         else:
-            return Direction.DirectionType.OUTBOUND
-         
-class RouteParser(TagParser):
-    
-    LATITUDE_MIN_LABEL = 'latMin'
-    LATITUDE_MAX_LABEL = 'latMax'
-    LONGITUDE_MIN_LABEL = 'lonMin'
-    LONGITUDE_MAX_LABEL = 'lonMax'
-    
-    def __init__(self):
-        pass
-        
-    def __str__(self):
-        pass
-        
-    @staticmethod
-    def parse_route_from_xml(xml):
-        print_xml(xml)
-        root_xml = xmlparser.fromstring(xml)
-        route_xml = list(root_xml)
-        route = RouteParser.get_data_from_dict(route_xml[0].attrib)
-        print str(route)
-
-        # TODO -> follow a similar pattern below and find out why I have to make a list to get route_xml
-        stops_xml = root_xml.findall("route/stop")
-        for stop_xml in stops_xml:
-            stop = StopParser.get_data_from_dict(stop_xml.attrib)
-            #print str(stop)
-
-        directions_xml = root_xml.findall("route/direction")
-        for direction_xml in directions_xml:
-            direction = DirectionParser.get_data_from_dict(direction_xml.attrib)
-            #print str(direction)
-            stops_xml = direction_xml.findall("stop")
-            for stop_xml in stops_xml:
-                tag = TagParser.get_tag(stop_xml.attrib)
-                #print tag
-
-        paths = root_xml.findall("route/path")
-        for path in paths:
-            #print "  ", path.tag, path.attrib
-            points = path.findall("point")
-            for point in points:
-                pass
-                #print "  ", "  ", point.tag, point.attrib
-              
-    @staticmethod    
-    def get_data_from_dict(values):
-        route = Route()
-        route.name = RouteParser.get_title(values)
-        route.tag = RouteParser.get_tag(values)
-        latitude_min = RouteParser.get_latitude_min(values)
-        latitude_max = RouteParser.get_latitude_max(values)
-        longitude_min = RouteParser.get_longitude_min(values)
-        longtitude_max = RouteParser.get_longitude_max(values)
-        route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
-        
-        return route
-        
+            return Parser.DirectionType.OUTBOUND
+            
     @staticmethod
     def get_latitude_min(values):
         return float( values.get(RouteParser.LATITUDE_MIN_LABEL) )
@@ -241,6 +125,110 @@ class RouteParser(TagParser):
     @staticmethod
     def get_longitude_max(values):
         return float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
+                    
+class StopParser(Parser):
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+    
+    @staticmethod    
+    def get_data_from_dict(values):
+        stop = Stop()
+        stop.id = Parser.get_stop_id(values)
+        stop.name = Parser.get_title(values)
+        stop.tag = Parser.get_tag(values)
+        latitude = Parser.get_latitude(values)
+        longitude = Parser.get_longitude(values)
+        location = Location(latitude, longitude)
+        stop.location = location
+        
+        return stop
+              
+class PointParser(Parser):
+    
+    def __init__(self):
+        pass
+    def __init__(self):
+        pass
+        
+    @staticmethod    
+    def get_data_from_dict(values):
+        location = Location()
+        latitude = Parser.get_latitude(values)
+        longitude = Parser.get_longitude(values)
+        location = Location(latitude, longitude) 
+        
+        return location
+                        
+class DirectionParser(Parser):
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+    
+    @staticmethod    
+    def get_data_from_dict(values):
+        direction = Direction()
+        direction.type = Parser.get_direction_type(values)
+        direction.name = Parser.get_title(values)
+        direction.tag = Parser.get_tag(values)
+        
+        return direction
+       
+class RouteParser(Parser):
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    @staticmethod
+    def parse_route_from_xml(xml):
+        print_xml(xml)
+        root_xml = xmlparser.fromstring(xml)
+        route_xml = list(root_xml)
+        route = RouteParser.get_data_from_dict(route_xml[0].attrib)
+        print str(route)
+
+        stops_xml = root_xml.findall("route/stop")
+        for stop_xml in stops_xml:
+            stop = StopParser.get_data_from_dict(stop_xml.attrib)
+            #print str(stop)
+
+        directions_xml = root_xml.findall("route/direction")
+        for direction_xml in directions_xml:
+            direction = DirectionParser.get_data_from_dict(direction_xml.attrib)
+            #print str(direction)
+            stops_xml = direction_xml.findall("stop")
+            for stop_xml in stops_xml:
+                tag = Parser.get_tag(stop_xml.attrib)
+                #print tag
+
+        paths = root_xml.findall("route/path")
+        for path in paths:
+            points_xml = path.findall("point")
+            for point_xml in points_xml:
+                location = PointParser.get_data_from_dict(point_xml)
+                print str(location)
+              
+    @staticmethod    
+    def get_data_from_dict(values):
+        route = Route()
+        route.name = Parser.get_title(values)
+        route.tag = Parser.get_tag(values)
+        latitude_min = Parser.get_latitude_min(values)
+        latitude_max = Parser.get_latitude_max(values)
+        longitude_min = Parser.get_longitude_min(values)
+        longtitude_max = Parser.get_longitude_max(values)
+        route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
+        
+        return route
         
 class Location(object):
 
@@ -263,9 +251,6 @@ class Stop(object):
         return self.name + '(' + str(self.id) + ') Location: ' + str(self.location)
         
 class Direction(object):
-    
-    DirectionType = enum(INBOUND=1, OUTBOUND=2)
-    # Is there a way to do this in constructor: dir_type=class.DirectionType.INBOUND
     
     def __init__(self, dir_type=1, name="Generic Direction", tag=-1):
         self.type = dir_type
