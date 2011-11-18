@@ -43,6 +43,9 @@ import time
 import re
 from xml.dom.minidom import parseString
 
+# Debug
+TEST = 2
+
 # Constants
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
 
@@ -190,32 +193,33 @@ class RouteParser(Parser):
         
     @staticmethod
     def parse_route_from_xml(xml):
-        print_xml(xml)
         root_xml = xmlparser.fromstring(xml)
         route_xml = list(root_xml)
         route = RouteParser.get_data_from_dict(route_xml[0].attrib)
-        print str(route)
 
         stops_xml = root_xml.findall("route/stop")
         for stop_xml in stops_xml:
             stop = StopParser.get_data_from_dict(stop_xml.attrib)
-            #print str(stop)
+            route.stops.append(stop)
 
         directions_xml = root_xml.findall("route/direction")
         for direction_xml in directions_xml:
             direction = DirectionParser.get_data_from_dict(direction_xml.attrib)
-            #print str(direction)
             stops_xml = direction_xml.findall("stop")
             for stop_xml in stops_xml:
                 tag = Parser.get_tag(stop_xml.attrib)
-                #print tag
+                stop = route.find_stop(tag)
+                direction.stops.append(stop)
+            route.directions.append(direction)
 
-        paths = root_xml.findall("route/path")
-        for path in paths:
-            points_xml = path.findall("point")
+        paths_xml = root_xml.findall("route/path")
+        for path_xml in paths_xml:
+            points_xml = path_xml.findall("point")
+            path = []
             for point_xml in points_xml:
                 location = PointParser.get_data_from_dict(point_xml)
-                print str(location)
+                path.append(location)
+            route.paths.append(path)
               
     @staticmethod    
     def get_data_from_dict(values):
@@ -285,7 +289,7 @@ class Route(object):
     def __str__(self):
         return self.name
         
-    def find_stop(tag):
+    def find_stop(self, tag):
         return filter(lambda x: x.tag == tag, self.stops)[0]
 
 # Functions
@@ -326,7 +330,7 @@ def simple_route_query_test():
     root = xmlparser.fromstring(routes_result)
     routes = list(root)
     
-    # DO THIS FOR TESTING
+    # Select only first value for testing
     for route in routes[:1]:
         route_url = route_detail_url + route.attrib['tag']
     
@@ -337,9 +341,9 @@ def simple_route_query_test():
     	
 if __name__ == "__main__":
     # Tests        
-    #connect_to_muni_test()
-    #time.sleep(1)
-    #print ''
-    simple_route_query_test()
+    if TEST == 1:
+        connect_to_muni_test()
+    elif TEST == 2:
+        simple_route_query_test()
 
 	
