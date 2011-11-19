@@ -330,7 +330,14 @@ class Route(object):
         return self.name
         
     def to_long_string(self):
-        return ""
+        output = self.name + "\n"
+        output += "Stops:"
+        for stop in stops:
+            output += "\t" + str(stop) + "\n"
+        output += "Number of directions: " + str(len(self.directions)) + "\n"
+        output += "Number of paths: " + str(len(self.paths)) + "\n"
+        
+        return output
         
     def find_stop(self, tag):
         return filter(lambda x: x.tag == tag, self.stops)[0]
@@ -381,6 +388,7 @@ def simple_route_query_test():
         route_detail_result = send_request(route_url)
         time.sleep(1)
         route = RouteParser.get_object_from_xml(route_detail_result)
+        #print route.to_long_string()
     	
 if __name__ == "__main__":
     # Tests        
