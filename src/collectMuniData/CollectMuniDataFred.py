@@ -44,7 +44,7 @@ import re
 from xml.dom.minidom import parseString
 
 # Debug
-TEST = 2
+TEST = 3
 
 # Constants
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
@@ -276,6 +276,22 @@ class RouteParser(Parser):
         
         return route
         
+class VehicleParser(Parser):
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    @staticmethod
+    def get_object_from_xml(xml):
+        pass
+        
+    @staticmethod
+    def get_object_from_dict(values):
+        pass
+        
 class Location(object):
 
     def __init__(self, latitude=0.0, longitude=0.0):
@@ -284,6 +300,16 @@ class Location(object):
 
     def __str__(self):
         return '(' + str(self.latitude) + ', ' + str(self.longitude) + ')'
+        
+class VehicleState(Location):
+    
+    def __init__(self, time=-1, heading=0, location=Location()):
+        self.time = time
+        self.heading = heading
+        self.location = location
+        
+    def __str__(self):
+        return str(self.time) + " Heading: " + str(self.heading) + " Location: " + str(self.location)
  
 class Stop(object):
     
@@ -345,6 +371,22 @@ class Route(object):
         
     def find_stop(self, tag):
         return filter(lambda x: x.tag == tag, self.stops)[0]
+        
+class Vehicle(object):
+    
+    def __init__(self):
+        self.id = 1
+        self.route = None
+        self.vehicle_states  = []
+        
+    def __str__(self):
+        return str(self.id) + ' Route: ' + str(self.route) + ' Current State: ' + str(self.get_current_state())
+        
+    def get_current_state(self):
+        if len(self.vehicle_states) > 0:
+            pass
+        else:
+            pass
 
 # Functions
 def send_request(url):
@@ -393,12 +435,34 @@ def simple_route_query_test():
         time.sleep(1)
         route = RouteParser.get_object_from_xml(route_detail_result)
         print route.to_long_string()
-    	
+        
+def get_vehicle_locations():
+    print "Test to get the current location of the buses."
+    routes_url = SF_MUNI_URL + 'routeList&a=sf-muni'
+    vehicle_url_base = SF_MUNI_URL + 'vehicleLocations&a=sf-muni&r='
+    last_time = 0
+    
+    print "Routes url: " + routes_url
+    routes_result = send_request(routes_url)
+    root = xmlparser.fromstring(routes_result)
+    routes = list(root)
+    
+    # Select only first value for testing
+    for route in routes[:1]:
+        vehicle_url = vehicle_url_base + route.attrib['tag'] + '&t=' + str(last_time)
+        
+        print "Vehicle detail url: " + vehicle_url
+        vehicle_detail_result = send_request(vehicle_url)
+        time.sleep(1)
+       
+       	
 if __name__ == "__main__":
     # Tests        
     if TEST == 1:
         connect_to_muni_test()
     elif TEST == 2:
         simple_route_query_test()
+    elif TEST == 3:
+        get_vehicle_locations()
 
 	
