@@ -306,7 +306,7 @@ class Direction(object):
         
     def __str__(self):
         dir_type = 'Outbound'
-        if self.type == Direction.DirectionType.INBOUND:
+        if self.type == Parser.DirectionType.INBOUND:
             dir_type = 'Inbound'
         return self.name + '(' + dir_type + ')' 
         
@@ -333,11 +333,13 @@ class Route(object):
         
     def to_long_string(self):
         output = self.name + "\n"
-        output += "Stops:"
-        for stop in stops:
-            output += "\t" + str(stop) + "\n"
-        output += "Number of directions: " + str(len(self.directions)) + "\n"
+        output += "Directions: " + "\n"
+        for direction in self.directions:
+            output += "\t" + str(direction) + "\n"
         output += "Number of paths: " + str(len(self.paths)) + "\n"
+        output += "Stops:"
+        for stop in self.stops:
+            output += "\t" + str(stop) + "\n"
         
         return output
         
