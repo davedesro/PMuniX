@@ -260,6 +260,8 @@ class RouteParser(Parser):
         route.stops = StopParser.get_object_from_xml(route_xml)
         route.directions = DirectionParser.get_object_from_xml(route_xml, route)
         route.paths = PathParser.get_object_from_xlm(route_xml)
+        
+        return route
               
     @staticmethod    
     def get_object_from_dict(values):
@@ -388,7 +390,7 @@ def simple_route_query_test():
         route_detail_result = send_request(route_url)
         time.sleep(1)
         route = RouteParser.get_object_from_xml(route_detail_result)
-        #print route.to_long_string()
+        print route.to_long_string()
     	
 if __name__ == "__main__":
     # Tests        
