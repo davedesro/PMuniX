@@ -81,9 +81,13 @@ class Parser(object):
     
     def __str__(self):
         pass
+        
+    @staticmethod
+    def get_object_from_xml(xml):
+        pass
      
     @staticmethod   
-    def get_data_from_dict(values):
+    def get_object_from_dict(values):
         pass
         
     @staticmethod
@@ -136,9 +140,19 @@ class StopParser(Parser):
         
     def __str__(self):
         pass
+        
+    @staticmethod
+    def get_object_from_xml(xml):
+        stops_xml = xml.findall("stop")
+        stops = []
+        for stop_xml in stops_xml:
+            stop = StopParser.get_object_from_dict(stop_xml.attrib)
+            stops.append(stop)
+            
+        return stops
     
     @staticmethod    
-    def get_data_from_dict(values):
+    def get_object_from_dict(values):
         stop = Stop()
         stop.id = Parser.get_stop_id(values)
         stop.name = Parser.get_title(values)
@@ -157,14 +171,46 @@ class PointParser(Parser):
     def __init__(self):
         pass
         
+    @staticmethod
+    def get_object_from_xml(xml):
+        points_xml = xml.findall("point")
+        points = []
+        for point_xml in points_xml:
+            location = PointParser.get_object_from_dict(point_xml)
+            points.append(location)
+            
+        return points
+        
     @staticmethod    
-    def get_data_from_dict(values):
+    def get_object_from_dict(values):
         location = Location()
         latitude = Parser.get_latitude(values)
         longitude = Parser.get_longitude(values)
         location = Location(latitude, longitude) 
         
         return location
+        
+class PathParser(Parser):
+    
+    def __init__(self):
+        pass
+        
+    def __str__(self):
+        pass
+        
+    @staticmethod
+    def get_object_from_xlm(xml):
+        paths_xml = xml.findall("path")
+        paths = []
+        for path_xml in paths_xml:
+            points = PointParser.get_object_from_xml(path_xml)
+            paths.append(points)
+                
+        return paths
+        
+    @staticmethod
+    def get_object_from_dict(values):
+        pass
                         
 class DirectionParser(Parser):
     
@@ -173,9 +219,24 @@ class DirectionParser(Parser):
         
     def __str__(self):
         pass
+                
+    @staticmethod
+    def get_object_from_xml(xml, route):
+        directions_xml = xml.findall("direction")
+        directions = []
+        for direction_xml in directions_xml:
+            direction = DirectionParser.get_object_from_dict(direction_xml.attrib)
+            stops_xml = direction_xml.findall("stop")
+            for stop_xml in stops_xml:
+                tag = Parser.get_tag(stop_xml.attrib)
+                stop = route.find_stop(tag)
+                direction.stops.append(stop)
+            directions.append(direction)
+            
+        return directions
     
     @staticmethod    
-    def get_data_from_dict(values):
+    def get_object_from_dict(values):
         direction = Direction()
         direction.type = Parser.get_direction_type(values)
         direction.name = Parser.get_title(values)
@@ -190,39 +251,18 @@ class RouteParser(Parser):
         
     def __str__(self):
         pass
-        
+                
     @staticmethod
-    def parse_route_from_xml(xml):
+    def get_object_from_xml(xml):
         root_xml = xmlparser.fromstring(xml)
-        route_xml = list(root_xml)
-        route = RouteParser.get_data_from_dict(route_xml[0].attrib)
-
-        stops_xml = root_xml.findall("route/stop")
-        for stop_xml in stops_xml:
-            stop = StopParser.get_data_from_dict(stop_xml.attrib)
-            route.stops.append(stop)
-
-        directions_xml = root_xml.findall("route/direction")
-        for direction_xml in directions_xml:
-            direction = DirectionParser.get_data_from_dict(direction_xml.attrib)
-            stops_xml = direction_xml.findall("stop")
-            for stop_xml in stops_xml:
-                tag = Parser.get_tag(stop_xml.attrib)
-                stop = route.find_stop(tag)
-                direction.stops.append(stop)
-            route.directions.append(direction)
-
-        paths_xml = root_xml.findall("route/path")
-        for path_xml in paths_xml:
-            points_xml = path_xml.findall("point")
-            path = []
-            for point_xml in points_xml:
-                location = PointParser.get_data_from_dict(point_xml)
-                path.append(location)
-            route.paths.append(path)
+        route_xml = root_xml[0]
+        route = RouteParser.get_object_from_dict(route_xml.attrib)
+        route.stops = StopParser.get_object_from_xml(route_xml)
+        route.directions = DirectionParser.get_object_from_xml(route_xml, route)
+        route.paths = PathParser.get_object_from_xlm(route_xml)
               
     @staticmethod    
-    def get_data_from_dict(values):
+    def get_object_from_dict(values):
         route = Route()
         route.name = Parser.get_title(values)
         route.tag = Parser.get_tag(values)
@@ -289,6 +329,9 @@ class Route(object):
     def __str__(self):
         return self.name
         
+    def to_long_string(self):
+        return ""
+        
     def find_stop(self, tag):
         return filter(lambda x: x.tag == tag, self.stops)[0]
 
@@ -337,7 +380,7 @@ def simple_route_query_test():
         print "Route detail url: " + route_url
         route_detail_result = send_request(route_url)
         time.sleep(1)
-        route = RouteParser.parse_route_from_xml(route_detail_result)
+        route = RouteParser.get_object_from_xml(route_detail_result)
     	
 if __name__ == "__main__":
     # Tests        
