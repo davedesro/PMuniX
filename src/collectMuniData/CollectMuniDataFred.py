@@ -112,7 +112,7 @@ class Parser(object):
         
     @staticmethod
     def get_route_tag(values):
-        return values.get(Parser.VEHICLE_ID_LABEL)
+        return values.get(Parser.ROUTE_TAG_LABEL)
 
     @staticmethod
     def get_latitude(values):
@@ -308,15 +308,15 @@ class VehicleStateParser(Parser):
     @staticmethod
     def get_object_from_xml(xml, vehicles, current_time):
         root_xml = xmlparser.fromstring(xml)
-        vehicle_xml = root_xml[0]
-        vehicles_state_xml = vehicle_xml.findall("vehicle")
+        vehicles_state_xml = root_xml.findall("vehicle")
         for vehicle_state_xml in vehicles_state_xml:
             vehicle_state = VehicleStateParser.get_object_from_dict(vehicle_state_xml.attrib)
             vehicle_state.time = current_time
             vehicle_id = Parser.get_vehicle_id(vehicle_state_xml.attrib)
-            vehicle = filter(lambda x: x.id == vehicle_id, vehicles)[0]
-            if vehicle != None:
-                vehicle.states.append(vehicle_state)
+            
+            current_vehicles = filter(lambda x: x.id == vehicle_id, vehicles)
+            if len(current_vehicles) != 0:
+                current_vehicles[0].states.append(vehicle_state)
             else:
                 route_tag = Parser.get_route_tag(vehicle_state_xml.attrib)
                 vehicle = Vehicle(vehicle_id=vehicle_id, route=route_tag)
@@ -328,9 +328,9 @@ class VehicleStateParser(Parser):
     @staticmethod
     def get_object_from_dict(values):
         vehicle_state = VehicleState()
-        location = Location()
         latitude = Parser.get_latitude(values)
         longitude = Parser.get_longitude(values)
+        location = Location(latitude=latitude, longitude=longitude)
         vehicle_state.location = location
         vehicle_state.heading = Parser.get_heading(values)
         vehicle_state.speed = Parser.get_speed(values)
@@ -420,7 +420,7 @@ class Route(object):
     def vehicles_to_string(self):
         output = "Vehicles:" + "\n"
         for vehicle in self.vehicles:
-            output += "\t" + str(self.vehicle) + "\n"
+            output += "\t" + str(vehicle) + "\n"
         return output
         
     def stops_to_string(self):
@@ -440,14 +440,8 @@ class Vehicle(object):
         self.states  = []
         
     def __str__(self):
-        return str(self.id) + ' Route: ' + str(self.route) + ' Current State: ' + str(self.get_current_state())
+        return str(self.id) + ' Route: ' + str(self.route) + ' Current State: ' + str(self.states[-1])
         
-    def get_current_state(self):
-        if len(self.states) > 0:
-            pass
-        else:
-            pass
-
 # Functions
 def send_request(url):
     result = None
