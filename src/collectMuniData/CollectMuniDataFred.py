@@ -307,7 +307,9 @@ class VehicleStateParser(Parser):
         
     @staticmethod
     def get_object_from_xml(xml, vehicles, current_time):
-        vehicles_state_xml = xml.findall("vehicle")
+        root_xml = xmlparser.fromstring(xml)
+        vehicle_xml = root_xml[0]
+        vehicles_state_xml = vehicle_xml.findall("vehicle")
         for vehicle_state_xml in vehicles_state_xml:
             vehicle_state = VehicleStateParser.get_object_from_dict(vehicle_state_xml.attrib)
             vehicle_state.time = current_time
@@ -416,7 +418,10 @@ class Route(object):
         return output
             
     def vehicles_to_string(self):
-        pass
+        output = "Vehicles:" + "\n"
+        for vehicle in self.vehicles:
+            output += "\t" + str(self.vehicle) + "\n"
+        return output
         
     def stops_to_string(self):
         pass    
@@ -514,13 +519,11 @@ def get_vehicle_locations():
         route = RouteParser.get_object_from_xml(route_detail_result)
         print route.route_to_string()
         
-        print "Vehicle detail url: " + vehicle_url
         vehicle_detail_result = send_request(vehicle_url)
         time.sleep(1)
         current_time = 1000
-        print vehicle_detail_result
         route.vehicles = VehicleStateParser.get_object_from_xml(vehicle_detail_result, route.vehicles, current_time)
-        print route.route_to_string()
+        print route.vehicles_to_string()
        
        	
 if __name__ == "__main__":
