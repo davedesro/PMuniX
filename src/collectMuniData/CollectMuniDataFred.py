@@ -518,6 +518,7 @@ def get_vehicle_locations():
         vehicle_detail_result = send_request(vehicle_url)
         time.sleep(1)
         current_time = 1000
+        print vehicle_detail_result
         route.vehicles = VehicleStateParser.get_object_from_xml(vehicle_detail_result, route.vehicles, current_time)
         print route.route_to_string()
        
