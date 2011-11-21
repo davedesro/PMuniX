@@ -61,16 +61,20 @@ def print_xml(xml_string):
 # Models   
 class Parser(object):
     
-    TITLE_LABEL = "title"
-    TAG_LABEL = "tag"
-    STOP_ID_LABEL = "stopId"
-    LATITUDE_LABEL = "lat"
-    LONGITUDE_LABEL = "lon"
-    NAME_LABEL = "name"
+    TITLE_LABEL = 'title'
+    TAG_LABEL = 'tag'
+    STOP_ID_LABEL = 'stopId'
+    VEHICLE_ID_LABEL = 'id'
+    ROUTE_TAG_LABEL = 'routeTag'
+    LATITUDE_LABEL = 'lat'
+    LONGITUDE_LABEL = 'lon'
+    NAME_LABEL = 'name'
     LATITUDE_MIN_LABEL = 'latMin'
     LATITUDE_MAX_LABEL = 'latMax'
     LONGITUDE_MIN_LABEL = 'lonMin'
     LONGITUDE_MAX_LABEL = 'lonMax'
+    HEADING_LABEL = 'heading'
+    SPEED_LABEL = 'speedKmHr'
     
     NAMES = ['Inbound', 'Outbound']
     
@@ -101,6 +105,14 @@ class Parser(object):
     @staticmethod
     def get_stop_id(values):
         return int( values.get(Parser.STOP_ID_LABEL) )
+        
+    @staticmethod
+    def get_vehicle_id(values):
+        return int( values.get(Parser.VEHICLE_ID_LABEL) )
+        
+    @staticmethod
+    def get_route_tag(values):
+        return values.get(Parser.VEHICLE_ID_LABEL)
 
     @staticmethod
     def get_latitude(values):
@@ -132,6 +144,15 @@ class Parser(object):
     @staticmethod
     def get_longitude_max(values):
         return float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
+
+    @staticmethod
+    def get_heading(values):
+        return int( values.get(RouteParser.HEADING_LABEL) )
+        
+    @staticmethod
+    def get_speed(values):
+        return float( values.get(RouteParser.SPEED_LABEL) )
+
                     
 class StopParser(Parser):
     
@@ -275,8 +296,8 @@ class RouteParser(Parser):
         route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
         
         return route
-        
-class VehicleParser(Parser):
+
+class VehicleStateParser(Parser):
     
     def __init__(self):
         pass
@@ -285,12 +306,33 @@ class VehicleParser(Parser):
         pass
         
     @staticmethod
-    def get_object_from_xml(xml):
-        pass
+    def get_object_from_xml(xml, vehicles, current_time):
+        vehicles_state_xml = xml.findall("vehicle")
+        for vehicle_state_xml in vehicles_state_xml:
+            vehicle_state = VehicleStateParser.get_object_from_dict(vehicle_state_xml.attrib)
+            vehicle_state.time = current_time
+            vehicle_id = Parser.get_vehicle_id(vehicle_state_xml.attrib)
+            vehicle = filter(lambda x: x.id == vehicle_id, vehicles)[0]
+            if vehicle != None:
+                vehicle.states.append(vehicle_state)
+            else:
+                route_tag = Parser.get_route_tag(vehicle_state_xml.attrib)
+                vehicle = Vehicle(vehicle_id=vehicle_id, route=route_tag)
+                vehicles.append(vehicle)
+        
+        return vehicles
         
     @staticmethod
     def get_object_from_dict(values):
-        pass
+        vehicle_state = VehicleState()
+        location = Location()
+        latitude = Parser.get_latitude(values)
+        longitude = Parser.get_longitude(values)
+        vehicle_state.location = location
+        vehicle_state.heading = Parser.get_heading(values)
+        vehicle_state.speed = Parser.get_speed(values)
+           
+        return vehicle_state
         
 class Location(object):
 
@@ -303,10 +345,11 @@ class Location(object):
         
 class VehicleState(Location):
     
-    def __init__(self, time=-1, heading=0, location=Location()):
+    def __init__(self, time=-1, heading=0, location=Location(), speed_km_hr=0.0):
         self.time = time
         self.heading = heading
         self.location = location
+        self.speed_km_hr = speed_km_hr
         
     def __str__(self):
         return str(self.time) + " Heading: " + str(self.heading) + " Location: " + str(self.location)
@@ -353,37 +396,48 @@ class Route(object):
         self.directions = []
         self.bounding_box = []
         self.paths = []
+        self.vehicles = []
         
     def __str__(self):
         return self.name
         
-    def to_long_string(self):
+    def route_to_string(self):
         output = self.name + "\n"
         output += "Directions: " + "\n"
         for direction in self.directions:
             output += "\t" + str(direction) + "\n"
         output += "Number of paths: " + str(len(self.paths)) + "\n"
+        output += "Number of vehicles: " + str(len(self.vehicles)) + "\n"
         output += "Stops:"
         for stop in self.stops:
             output += "\t" + str(stop) + "\n"
-        
+            
         return output
+            
+    def vehicles_to_string(self):
+        pass
+        
+    def stops_to_string(self):
+        pass    
+    
+    def paths_to_string(self):
+        pass
         
     def find_stop(self, tag):
         return filter(lambda x: x.tag == tag, self.stops)[0]
         
 class Vehicle(object):
     
-    def __init__(self):
-        self.id = 1
-        self.route = None
-        self.vehicle_states  = []
+    def __init__(self, vehicle_id=1, route="Generic Route"):
+        self.id = vehicle_id
+        self.route = route
+        self.states  = []
         
     def __str__(self):
         return str(self.id) + ' Route: ' + str(self.route) + ' Current State: ' + str(self.get_current_state())
         
     def get_current_state(self):
-        if len(self.vehicle_states) > 0:
+        if len(self.states) > 0:
             pass
         else:
             pass
@@ -434,7 +488,7 @@ def simple_route_query_test():
         route_detail_result = send_request(route_url)
         time.sleep(1)
         route = RouteParser.get_object_from_xml(route_detail_result)
-        print route.to_long_string()
+        print route.route_to_string()
         
 def get_vehicle_locations():
     print "Test to get the current location of the buses."
