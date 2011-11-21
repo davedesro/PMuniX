@@ -318,6 +318,7 @@ class VehicleStateParser(Parser):
             else:
                 route_tag = Parser.get_route_tag(vehicle_state_xml.attrib)
                 vehicle = Vehicle(vehicle_id=vehicle_id, route=route_tag)
+                vehicle.states.append(vehicle_state)
                 vehicles.append(vehicle)
         
         return vehicles
@@ -493,6 +494,7 @@ def simple_route_query_test():
 def get_vehicle_locations():
     print "Test to get the current location of the buses."
     routes_url = SF_MUNI_URL + 'routeList&a=sf-muni'
+    route_detail_url = SF_MUNI_URL + 'routeConfig&a=sf-muni&r='
     vehicle_url_base = SF_MUNI_URL + 'vehicleLocations&a=sf-muni&r='
     last_time = 0
     
@@ -503,11 +505,21 @@ def get_vehicle_locations():
     
     # Select only first value for testing
     for route in routes[:1]:
+        route_url = route_detail_url + route.attrib['tag']
         vehicle_url = vehicle_url_base + route.attrib['tag'] + '&t=' + str(last_time)
+        
+        print "Route detail url: " + route_url
+        route_detail_result = send_request(route_url)
+        time.sleep(1)
+        route = RouteParser.get_object_from_xml(route_detail_result)
+        print route.route_to_string()
         
         print "Vehicle detail url: " + vehicle_url
         vehicle_detail_result = send_request(vehicle_url)
         time.sleep(1)
+        current_time = 1000
+        route.vehicles = VehicleStateParser.get_object_from_xml(vehicle_detail_result, route.vehicles, current_time)
+        print route.route_to_string()
        
        	
 if __name__ == "__main__":
