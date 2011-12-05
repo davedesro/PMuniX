@@ -21,6 +21,11 @@
 *.tar
 *.zip
 
+# Backup files #
+################
+*.*~
+*.*#
+
 # Logs and databases #
 ######################
 *.log
