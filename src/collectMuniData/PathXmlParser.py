@@ -1,8 +1,9 @@
 # -----------------------------------------------------------------------------
 #
-#   XmlPathParser.py
+#   PathXmlParser.py
 #   By: Fred Stakem
-#   Date: 12.9.11
+#   Created: 12.9.11
+#   Last Modified: 12.13.11
 #
 #   Purpose: This is the xml path parser class for parsing Muni paths.
 #
@@ -14,7 +15,7 @@
 import XmlParser as XmlParser
 import Location as Location
 
-class XmlPathParser(XmlParser):
+class PathXmlParser(XmlParser):
     
     PATH_TAG = "path"
     
@@ -26,10 +27,10 @@ class XmlPathParser(XmlParser):
         
     @staticmethod
     def get_object_from_xml(xml):
-        paths_xml = xml.findall(XmlPathParser.PATH_TAG)
+        paths_xml = xml.findall(PathXmlParser.PATH_TAG)
         paths = []
         for path_xml in paths_xml:
-            points = XmlPointParser.get_object_from_xml(path_xml)
+            points = PointXmlParser.get_object_from_xml(path_xml)
             paths.append(points)
                 
         return paths

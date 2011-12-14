@@ -1,8 +1,9 @@
 # -----------------------------------------------------------------------------
 #
-#   XmlStopParser.py
+#   StopXmlParser.py
 #   By: Fred Stakem
-#   Date: 12.6.11
+#   Created: 12.6.11
+#   Last Modified: 12.13.11
 #
 #   Purpose: This is the xml stop parser class for parsing Muni stops.
 #
@@ -12,10 +13,11 @@
 
 # Import classes
 import XmlParser as XmlParser
+import StopXmlParser as StopXmlParser
 import Stop as Stop
 import Location as Location
 
-class XmlStopParser(XmlParser):
+class StopXmlParser(XmlParser):
     
     STOP_TAG = "stop"
     
@@ -30,7 +32,7 @@ class XmlStopParser(XmlParser):
         stops_xml = xml.findall(XmlStopParser.STOP_TAG)
         stops = []
         for stop_xml in stops_xml:
-            stop = XmlStopParser.get_object_from_dict(stop_xml.attrib)
+            stop = StopXmlParser.get_object_from_dict(stop_xml.attrib)
             stops.append(stop)
             
         return stops

@@ -1,8 +1,9 @@
 # -----------------------------------------------------------------------------
 #
-#   XmlPointParser.py
+#   PointXmlParser.py
 #   By: Fred Stakem
-#   Date: 12.9.11
+#   Created: 12.9.11
+#   Last Modified: 12.13.11
 #
 #   Purpose: This is the xml point parser class for parsing Muni points.
 #
@@ -14,7 +15,7 @@
 import XmlParser as XmlParser
 import Location as Location
 
-class XmlPointParser(XmlParser):
+class PointXmlParser(XmlParser):
     
     POINT_TAG = "point"
     
@@ -25,10 +26,10 @@ class XmlPointParser(XmlParser):
         
     @staticmethod
     def get_object_from_xml(xml):
-        points_xml = xml.findall(XmlPointParser.POINT_TAG)
+        points_xml = xml.findall(PointXmlParser.POINT_TAG)
         points = []
         for point_xml in points_xml:
-            location = XmlPointParser.get_object_from_dict(point_xml)
+            location = PointXmlParser.get_object_from_dict(point_xml)
             points.append(location)
             
         return points

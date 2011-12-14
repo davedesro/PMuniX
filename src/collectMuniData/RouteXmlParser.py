@@ -1,8 +1,9 @@
 # -----------------------------------------------------------------------------
 #
-#   XmlRouteParser.py
+#   RouteXmlParser.py
 #   By: Fred Stakem
-#   Date: 12.9.11
+#   Created: 12.9.11
+#   Last Modified: 12.13.11
 #
 #   Purpose: This is the xml route parser class for parsing Muni 
 #   routes.
@@ -13,8 +14,12 @@
 
 # Import classes
 import XmlParser as XmlParser
+import RouteXmlParser as RouteXmlParser
+import StopXmlParser as StopXmlParser
+import DirectionXmlParser as DirectionXmlParser
+import PathXmlParser as PathXmlParser
 
-class XmlRouteParser(XmlParser):
+class RouteXmlParser(XmlParser):
     
     def __init__(self):
         pass
@@ -26,10 +31,10 @@ class XmlRouteParser(XmlParser):
     def get_object_from_xml(xml):
         root_xml = xmlparser.fromstring(xml)
         route_xml = root_xml[0]
-        route = RouteParser.get_object_from_dict(route_xml.attrib)
-        route.stops = StopParser.get_object_from_xml(route_xml)
-        route.directions = DirectionParser.get_object_from_xml(route_xml, route)
-        route.paths = PathParser.get_object_from_xlm(route_xml)
+        route = RouteXmlParser.get_object_from_dict(route_xml.attrib)
+        route.stops = StopXmlParser.get_object_from_xml(route_xml)
+        route.directions = DirectionXmlParser.get_object_from_xml(route_xml, route)
+        route.paths = PathXmlParser.get_object_from_xlm(route_xml)
         
         return route
               
