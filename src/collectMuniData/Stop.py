@@ -2,7 +2,8 @@
 #
 #   Stop.py
 #   By: Fred Stakem
-#   Date: 12.6.11
+#   Created: 12.6.11
+#   Modified: 12.13.11
 #
 #   Purpose: This is the stop class for storing Muni stops.
 #

@@ -2,7 +2,8 @@
 #
 #   Location.py
 #   By: Fred Stakem
-#   Date: 12.9.11
+#   Created: 12.9.11
+#   Last Modified: 12.13.11
 #
 #   Purpose: This is the location class for storing world locations.
 #
