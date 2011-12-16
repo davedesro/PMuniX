@@ -13,10 +13,10 @@
 # Import libs
 
 # Import classes
-import XmlParser as XmlParser
-import Vehicle as Vehicle
-import VehicleState as VehicleState
-import Location as Location
+from XmlParser import XmlParser
+from Vehicle import Vehicle
+from VehicleState import VehicleState
+from Location import Location
 
 class VehicleStateXmlParser(XmlParser):
     

@@ -12,10 +12,9 @@
 # Import libs
 
 # Import classes
-import XmlParser as XmlParser
-import StopXmlParser as StopXmlParser
-import Stop as Stop
-import Location as Location
+from XmlParser import XmlParser
+from Stop import Stop
+from Location import Location
 
 class StopXmlParser(XmlParser):
     
@@ -28,8 +27,8 @@ class StopXmlParser(XmlParser):
         pass
         
     @staticmethod
-    def get_objects_from_xml(xml):
-        stops_xml = xml.findall(XmlStopParser.STOP_TAG)
+    def get_object_from_xml(xml):
+        stops_xml = xml.findall(StopXmlParser.STOP_TAG)
         stops = []
         for stop_xml in stops_xml:
             stop = StopXmlParser.get_object_from_dict(stop_xml.attrib)

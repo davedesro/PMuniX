@@ -10,10 +10,11 @@
 # -----------------------------------------------------------------------------
 
 # Import libs
+import Util
 
 # Import classes
 
-class Parser(object):
+class XmlParser(object):
     
     TITLE_LABEL = 'title'
     TAG_LABEL = 'tag'
@@ -32,7 +33,7 @@ class Parser(object):
     
     NAMES = ['Inbound', 'Outbound']
     
-    DirectionType = enum(INBOUND=1, OUTBOUND=2)
+    DirectionType = Util.enum(INBOUND=1, OUTBOUND=2)
     
     def __init__(self):
         pass
@@ -82,27 +83,12 @@ class Parser(object):
             return XmlParser.DirectionType.INBOUND
         else:
             return XmlParser.DirectionType.OUTBOUND
-            
-    @staticmethod
-    def get_latitude_min(values):
-        return float( values.get(RouteParser.LATITUDE_MIN_LABEL) )
-
-    @staticmethod
-    def get_latitude_max(values):
-        return float( values.get(RouteParser.LATITUDE_MAX_LABEL) )
-
-    @staticmethod
-    def get_longitude_min(values):
-        return float( values.get(RouteParser.LONGITUDE_MIN_LABEL) )
-
-    @staticmethod
-    def get_longitude_max(values):
-        return float( values.get(RouteParser.LONGITUDE_MAX_LABEL) )
-
+              
     @staticmethod
     def get_heading(values):
-        return int( values.get(RouteParser.HEADING_LABEL) )
-        
+        return int( values.get(XmlParser.HEADING_LABEL) )
+
     @staticmethod
     def get_speed(values):
-        return float( values.get(RouteParser.SPEED_LABEL) )
+        return float( values.get(XmlParser.SPEED_LABEL) )
+            

@@ -12,8 +12,8 @@
 # Import libs
 
 # Import classes
-import XmlParser as XmlParser
-import Location as Location
+from XmlParser import XmlParser
+from Location import Location
 
 class PointXmlParser(XmlParser):
     

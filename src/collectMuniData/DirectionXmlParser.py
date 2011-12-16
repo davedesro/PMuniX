@@ -13,7 +13,8 @@
 # Import libs
 
 # Import classes
-import XmlParser as XmlParser
+from XmlParser import XmlParser
+from Direction import Direction
 
 class DirectionXmlParser(XmlParser):
     

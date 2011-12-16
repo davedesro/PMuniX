@@ -44,7 +44,7 @@ import re
 from xml.dom.minidom import parseString
 
 # Debug
-TEST = 3
+TEST = 2
 
 # Constants
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
@@ -476,7 +476,7 @@ def simple_route_query_test():
     route_detail_url = SF_MUNI_URL + 'routeConfig&a=sf-muni&r='
     
     print "Routes url: " + routes_url
-    routes_result = send_request(routes_url)
+    routes_result = send_request(routes_url) 
     root = xmlparser.fromstring(routes_result)
     routes = list(root)
     

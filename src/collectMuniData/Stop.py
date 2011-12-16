@@ -12,7 +12,7 @@
 # Import libs
 
 # Import classes
-import Location as Location
+from Location import Location
 
 class Stop(object):
     

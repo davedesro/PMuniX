@@ -11,13 +11,14 @@
 # -----------------------------------------------------------------------------
 
 # Import libs
+import xml.etree.ElementTree as xmlLib
 
 # Import classes
-import XmlParser as XmlParser
-import RouteXmlParser as RouteXmlParser
-import StopXmlParser as StopXmlParser
-import DirectionXmlParser as DirectionXmlParser
-import PathXmlParser as PathXmlParser
+from XmlParser import XmlParser
+from StopXmlParser import StopXmlParser
+from DirectionXmlParser import DirectionXmlParser
+from PathXmlParser import PathXmlParser
+from Route import Route
 
 class RouteXmlParser(XmlParser):
     
@@ -26,15 +27,41 @@ class RouteXmlParser(XmlParser):
         
     def __str__(self):
         pass
+        
+    @staticmethod
+    def get_latitude_min(values):
+        return float( values.get(RouteXmlParser.LATITUDE_MIN_LABEL) )
+
+    @staticmethod
+    def get_latitude_max(values):
+        return float( values.get(RouteXmlParser.LATITUDE_MAX_LABEL) )
+
+    @staticmethod
+    def get_longitude_min(values):
+        return float( values.get(RouteXmlParser.LONGITUDE_MIN_LABEL) )
+
+    @staticmethod
+    def get_longitude_max(values):
+        return float( values.get(RouteXmlParser.LONGITUDE_MAX_LABEL) )
+  
+    @staticmethod
+    def get_route_tag_from_list(xml, index=0):
+        root = xmlLib.fromstring(xml)
+        routes = list(root)
+        
+        if index >= 0 and index < len(routes):
+            return routes[index].attrib['tag']
+        else:
+            return ""
                 
     @staticmethod
     def get_object_from_xml(xml):
-        root_xml = xmlparser.fromstring(xml)
+        root_xml = xmlLib.fromstring(xml)
         route_xml = root_xml[0]
         route = RouteXmlParser.get_object_from_dict(route_xml.attrib)
         route.stops = StopXmlParser.get_object_from_xml(route_xml)
         route.directions = DirectionXmlParser.get_object_from_xml(route_xml, route)
-        route.paths = PathXmlParser.get_object_from_xlm(route_xml)
+        route.paths = PathXmlParser.get_object_from_xml(route_xml)
         
         return route
               
@@ -43,10 +70,10 @@ class RouteXmlParser(XmlParser):
         route = Route()
         route.name = XmlParser.get_title(values)
         route.tag = XmlParser.get_tag(values)
-        latitude_min = XmlParser.get_latitude_min(values)
-        latitude_max = XmlParser.get_latitude_max(values)
-        longitude_min = XmlParser.get_longitude_min(values)
-        longtitude_max = XmlParser.get_longitude_max(values)
+        latitude_min = RouteXmlParser.get_latitude_min(values)
+        latitude_max = RouteXmlParser.get_latitude_max(values)
+        longitude_min = RouteXmlParser.get_longitude_min(values)
+        longtitude_max = RouteXmlParser.get_longitude_max(values)
         route.bounding_box = [ [latitude_min, latitude_max], [longitude_min, longtitude_max] ]
         
         return route
