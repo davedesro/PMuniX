@@ -6,7 +6,7 @@
 #   Last Modified: 12.13.11
 #
 #   Purpose: This is the xml direction parser class for parsing the state 
-#   of Muni buses. 
+#            of Muni buses. 
 #
 # -----------------------------------------------------------------------------
 
