@@ -19,6 +19,7 @@ from XmlParser import XmlParser
 from StopXmlParser import StopXmlParser
 
 class StopXmlParserTest(unittest.TestCase):
+    
     def setUp(self):
         unittest.TestCase.setUp(self)
 

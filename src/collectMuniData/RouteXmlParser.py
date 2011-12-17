@@ -60,7 +60,7 @@ class RouteXmlParser(XmlParser):
         route_xml = root_xml[0]
         route = RouteXmlParser.get_object_from_dict(route_xml.attrib)
         route.stops = StopXmlParser.get_object_from_xml(route_xml)
-        route.directions = DirectionXmlParser.get_object_from_xml(route_xml, route)
+        route.directions = DirectionXmlParser.get_object_from_xml(route_xml, route.stops)
         route.paths = PathXmlParser.get_object_from_xml(route_xml)
         
         return route

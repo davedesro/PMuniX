@@ -28,7 +28,7 @@ class DirectionXmlParser(XmlParser):
         pass
                 
     @staticmethod
-    def get_object_from_xml(xml, route):
+    def get_object_from_xml(xml, stops):
         directions_xml = xml.findall(DirectionXmlParser.DIRECTION_TAG)
         directions = []
         for direction_xml in directions_xml:
@@ -36,7 +36,7 @@ class DirectionXmlParser(XmlParser):
             stops_xml = direction_xml.findall(DirectionXmlParser.STOP_TAG)
             for stop_xml in stops_xml:
                 tag = XmlParser.get_tag(stop_xml.attrib)
-                stop = route.find_stop(tag)
+                stop = filter(lambda x: x.tag == int(tag), stops)[0]
                 direction.stops.append(stop)
             directions.append(direction)
             

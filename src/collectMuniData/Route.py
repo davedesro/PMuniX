@@ -53,5 +53,3 @@ class Route(object):
     def paths_to_string(self):
         pass
         
-    def find_stop(self, tag):
-        return filter(lambda x: x.tag == tag, self.stops)[0]
