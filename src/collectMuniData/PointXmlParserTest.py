@@ -17,6 +17,7 @@ import xml.etree.ElementTree as xmlLib
 # Import classes
 from XmlParser import XmlParser
 from PointXmlParser import PointXmlParser
+from Location import Location
 
 class PointXmlParserTest(unittest.TestCase):
     
@@ -37,9 +38,11 @@ class PointXmlParserTest(unittest.TestCase):
                                 locations[2].latitude, locations[2].longitude )
         
         root_xml = xmlLib.fromstring(xml)
-        locations = PointXmlParser.get_object_from_xml(root_xml)
-        self.assertEqual(len(locations), 3)
-        self.assertEqual(len(paths), 2)
+        parsed_locations = PointXmlParser.get_object_from_xml(root_xml)
+        self.assertEqual(len(parsed_locations), 3)
+        self.assertEqual(parsed_locations[0], locations[0])
+        self.assertEqual(parsed_locations[1], locations[1])
+        self.assertEqual(parsed_locations[2], locations[2])
                
 if __name__ == '__main__':
     unittest.main()

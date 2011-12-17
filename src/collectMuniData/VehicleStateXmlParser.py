@@ -11,6 +11,7 @@
 # -----------------------------------------------------------------------------
 
 # Import libs
+import xml.etree.ElementTree as xmlLib
 
 # Import classes
 from XmlParser import XmlParser
@@ -30,7 +31,7 @@ class VehicleStateXmlParser(XmlParser):
         
     @staticmethod
     def get_object_from_xml(xml, vehicles, current_time):
-        root_xml = xmlparser.fromstring(xml)
+        root_xml = xmlLib.fromstring(xml)
         vehicles_state_xml = root_xml.findall(VehicleStateXmlParser.VEHICLE_TAG)
         for vehicle_state_xml in vehicles_state_xml:
             vehicle_state = VehicleStateXmlParser.get_object_from_dict(vehicle_state_xml.attrib)

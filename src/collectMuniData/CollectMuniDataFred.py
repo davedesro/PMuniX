@@ -44,7 +44,7 @@ import re
 from xml.dom.minidom import parseString
 
 # Debug
-TEST = 2
+TEST = 3
 
 # Constants
 SF_MUNI_URL = 'http://webservices.nextbus.com/service/publicXMLFeed?command='
@@ -513,6 +513,7 @@ def get_vehicle_locations():
         route = RouteParser.get_object_from_xml(route_detail_result)
         print route.route_to_string()
         
+        print "Bus detail url: " + vehicle_url
         vehicle_detail_result = send_request(vehicle_url)
         time.sleep(1)
         current_time = 1000
